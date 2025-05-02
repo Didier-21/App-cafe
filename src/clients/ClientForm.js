@@ -1,55 +1,54 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
-function ClientForm({ onSubmit }) {
-  const [form, setForm] = useState({
+const ClientForm = ({ onSave, selectedClient, onCancelEdit }) => {
+  const [client, setClient] = useState({
     name: '',
-    phone: '',
-    address: ''
+    address: '',
+    phone: ''
   });
 
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+  useEffect(() => {
+    if (selectedClient) {
+      setClient(selectedClient);
+    } else {
+      setClient({ name: '', address: '', phone: '' });
+    }
+  }, [selectedClient]);
+
+  const handleChange = e => {
+    setClient({ ...client, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = e => {
     e.preventDefault();
-    if (!form.name || !form.phone) return;
-    onSubmit(form);
-    setForm({ name: '', phone: '', address: '' });
+    if (!client.name || !client.phone) return;
+
+    onSave(client);
+    setClient({ name: '', address: '', phone: '' });
+  };
+
+  const handleCancel = () => {
+    setClient({ name: '', address: '', phone: '' });
+    onCancelEdit();
   };
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white p-4 shadow-md rounded mb-4">
-      <h2 className="text-xl font-semibold mb-2">Registrar Cliente</h2>
-      <input
-        type="text"
-        name="name"
-        placeholder="Nombre"
-        value={form.name}
-        onChange={handleChange}
-        className="w-full mb-2 p-2 border rounded"
-      />
-      <input
-        type="text"
-        name="phone"
-        placeholder="Teléfono"
-        value={form.phone}
-        onChange={handleChange}
-        className="w-full mb-2 p-2 border rounded"
-      />
-      <input
-        type="text"
-        name="address"
-        placeholder="Dirección"
-        value={form.address}
-        onChange={handleChange}
-        className="w-full mb-2 p-2 border rounded"
-      />
-      <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">
-        Agregar
-      </button>
+    <form onSubmit={handleSubmit} className="mb-4 space-y-4">
+      <input name="name" placeholder="Nombre" value={client.name} onChange={handleChange} className="w-full p-2 border rounded" />
+      <input name="address" placeholder="Dirección" value={client.address} onChange={handleChange} className="w-full p-2 border rounded" />
+      <input name="phone" placeholder="Teléfono" value={client.phone} onChange={handleChange} className="w-full p-2 border rounded" />
+      <div className="flex gap-2">
+        <button type="submit" className="px-4 py-2 bg-blue-500 text-white rounded">
+          {client.id ? 'Actualizar' : 'Agregar'}
+        </button>
+        {client.id && (
+          <button type="button" onClick={handleCancel} className="px-4 py-2 bg-gray-400 text-white rounded">
+            Cancelar
+          </button>
+        )}
+      </div>
     </form>
   );
-}
+};
 
 export default ClientForm;

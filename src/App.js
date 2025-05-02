@@ -1,25 +1,49 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import ClientForm from './clients/ClientForm';
 import ClientList from './clients/ClientList';
-import { addClient, getClients } from './clients/clientActions';
+import { getClients, saveClient, deleteClient, updateClient } from './clients/clientActions';
 
 function App() {
-  const [clients, setClients] = useState(getClients());
+  const [clients, setClients] = useState([]);
+  const [selectedClient, setSelectedClient] = useState(null);
 
-  const handleAddClient = (newClient) => {
-    addClient(newClient);
+  useEffect(() => {
+    setClients(getClients());
+  }, []);
+
+  const handleSave = (client) => {
+    if (client.id) {
+      updateClient(client);
+    } else {
+      saveClient(client);
+    }
+    setClients(getClients());
+    setSelectedClient(null);
+  };
+
+  const handleDelete = (id) => {
+    deleteClient(id);
     setClients(getClients());
   };
 
+  const handleEdit = (client) => {
+    setSelectedClient(client);
+  };
+
+  const cancelEdit = () => {
+    setSelectedClient(null);
+  };
+
   return (
-    <div className="App">
-      <h1 className="text-4xl font-bold text-center text-blue-600 mt-10">Bienvenido a Cafe App</h1>
-      <div className="max-w-4xl mx-auto mt-10">
-        <ClientForm onSubmit={handleAddClient} />
-        <ClientList clients={clients} />
-      </div>
+    <div className="max-w-xl mx-auto p-4">
+      <h1 className="text-2xl font-bold mb-4">Agenda de Clientes</h1>
+      <ClientForm onSave={handleSave} selectedClient={selectedClient} onCancelEdit={cancelEdit} />
+      <ClientList clients={clients} onDelete={handleDelete} onEdit={handleEdit} />
     </div>
   );
 }
 
 export default App;
+
+
+  

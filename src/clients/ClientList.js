@@ -1,23 +1,24 @@
 import React from 'react';
 
-function ClientList({ clients }) {
+const ClientList = ({ clients, onDelete, onEdit }) => {
   return (
-    <div className="bg-white p-4 shadow-md rounded">
-      <h2 className="text-xl font-semibold mb-2">Lista de Clientes</h2>
-      {clients.length === 0 ? (
-        <p>No hay clientes registrados.</p>
-      ) : (
-        <ul className="list-disc pl-4">
-          {clients.map((client, index) => (
-            <li key={index}>
-              <strong>{client.name}</strong> - {client.phone} ({client.address})
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
+    <ul className="space-y-2">
+      {clients.map(client => (
+        <li key={client.id} className="p-3 border rounded flex justify-between items-center">
+          <div>
+            <p className="font-bold">{client.name}</p>
+            <p>{client.address}</p>
+            <p>{client.phone}</p>
+          </div>
+          <div className="flex gap-2">
+            <button onClick={() => onEdit(client)} className="px-2 py-1 bg-yellow-500 text-white rounded">Editar</button>
+            <button onClick={() => onDelete(client.id)} className="px-2 py-1 bg-red-500 text-white rounded">Eliminar</button>
+          </div>
+        </li>
+      ))}
+    </ul>
   );
-}
+};
 
 export default ClientList;
 
