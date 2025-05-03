@@ -1,49 +1,32 @@
-import React, { useState, useEffect } from 'react';
-import ClientForm from './clients/ClientForm';
-import ClientList from './clients/ClientList';
-import { getClients, saveClient, deleteClient, updateClient } from './clients/clientActions';
+// src/App.js
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+
+import ClientsPage from './pages/ClientsPage';
+//import CoffeePurchasesPage from './pages/CoffeePurchasesPage';
+//import LotsPage from './pages/LotsPage';
+import HomePage from './pages/HomePage';
 
 function App() {
-  const [clients, setClients] = useState([]);
-  const [selectedClient, setSelectedClient] = useState(null);
-
-  useEffect(() => {
-    setClients(getClients());
-  }, []);
-
-  const handleSave = (client) => {
-    if (client.id) {
-      updateClient(client);
-    } else {
-      saveClient(client);
-    }
-    setClients(getClients());
-    setSelectedClient(null);
-  };
-
-  const handleDelete = (id) => {
-    deleteClient(id);
-    setClients(getClients());
-  };
-
-  const handleEdit = (client) => {
-    setSelectedClient(client);
-  };
-
-  const cancelEdit = () => {
-    setSelectedClient(null);
-  };
-
   return (
-    <div className="max-w-xl mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Agenda de Clientes</h1>
-      <ClientForm onSave={handleSave} selectedClient={selectedClient} onCancelEdit={cancelEdit} />
-      <ClientList clients={clients} onDelete={handleDelete} onEdit={handleEdit} />
-    </div>
+    <Router>
+      <nav className="bg-gray-800 text-white p-4">
+        <ul className="flex gap-4">
+          <li><Link to="/">Inicio</Link></li>
+          <li><Link to="/clientes">Clientes</Link></li>
+          {/* <li><Link to="/compras">Compras</Link></li> */}
+          {/* <li><Link to="/lotes">Lotes</Link></li> */}
+        </ul>
+      </nav>
+
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/clientes" element={<ClientsPage />} />
+        {/* <Route path="/compras" element={<CoffeePurchasesPage />} /> */}
+        {/* <Route path="/lotes" element={<LotsPage />} /> */}
+      </Routes>
+    </Router>
   );
 }
 
 export default App;
-
-
-  
