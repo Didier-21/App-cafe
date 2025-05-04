@@ -34,10 +34,12 @@ export default function CoffeeForm({ onSave, selectedPurchase, onCancelEdit }) {
         precio: '',
         ubicacion: '',
         nota: '',
+        fecha: '',
       });
     }
     setErrors({});
   }, [selectedPurchase]);
+  
 
   // Validaciones
   const validate = () => {
@@ -60,22 +62,25 @@ export default function CoffeeForm({ onSave, selectedPurchase, onCancelEdit }) {
     }
     return +peso;
   };
-
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!validate()) return;
-
+  
     const pesoNeto = calcularPesoNeto(parseFloat(form.peso), form.tipo);
     const total = +(pesoNeto * parseFloat(form.precio)).toFixed(2);
-
-    onSave({
+  
+    const nuevaCompra = {
       ...form,
       peso: parseFloat(form.peso),
       precio: parseFloat(form.precio),
-      pesoNeto,
+      pesoNeto: parseFloat(pesoNeto.toFixed(1)),
       total,
-    });
-
+      fecha: selectedPurchase ? form.fecha : new Date().toISOString(),
+      id: selectedPurchase?.id ?? undefined,
+    };
+  
+    onSave(nuevaCompra);
+  
     setForm({
       nombreCliente: '',
       tipo: '',
@@ -83,9 +88,11 @@ export default function CoffeeForm({ onSave, selectedPurchase, onCancelEdit }) {
       precio: '',
       ubicacion: '',
       nota: '',
+      fecha: '',
     });
     setErrors({});
   };
+  
 
   return (
     <form onSubmit={handleSubmit} className="bg-white p-6 rounded shadow space-y-4">

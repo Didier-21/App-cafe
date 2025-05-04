@@ -1,44 +1,59 @@
-// src/components/coffeePurchases/CoffeeList.js
 import React from 'react';
 
-export default function CoffeeList({ purchases, onEdit, onDelete }) {
-  if (!Array.isArray(purchases) || purchases.length === 0) {
-    return <p className="text-center p-4">No hay compras registradas.</p>;
-  }
+export default function CoffeeList({ purchases, onDelete, onEdit }) {
+  const formatMoney = (value) =>
+    value.toLocaleString('es-CO', { style: 'currency', currency: 'COP' });
+
+  const formatDate = (isoDate) => {
+    const date = new Date(isoDate);
+    return date.toLocaleString('es-CO', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
 
   return (
-    <div className="overflow-x-auto">
-      <table className="min-w-full table-auto bg-white shadow rounded">
+    <div className="mt-6 overflow-x-auto">
+      <table className="min-w-full bg-white border shadow">
         <thead>
-          <tr className="bg-gray-800 text-white">
-            <th className="px-4 py-2">Cliente</th>
-            <th className="px-4 py-2">Tipo</th>
-            <th className="px-4 py-2">Peso</th>
-            <th className="px-4 py-2">Peso Neto</th>
-            <th className="px-4 py-2">Precio</th>
-            <th className="px-4 py-2">Total</th>
-            <th className="px-4 py-2">Acciones</th>
+          <tr className="bg-gray-100 text-left">
+            <th className="py-2 px-4 border">Cliente</th>
+            <th className="py-2 px-4 border">Tipo</th>
+            <th className="py-2 px-4 border">Peso (Kg)</th>
+            <th className="py-2 px-4 border">Peso Neto</th>
+            <th className="py-2 px-4 border">Precio/Kg</th>
+            <th className="py-2 px-4 border">Total</th>
+            <th className="py-2 px-4 border">Ubicación</th>
+            <th className="py-2 px-4 border">Nota</th>
+            <th className="py-2 px-4 border">Fecha</th>
+            <th className="py-2 px-4 border">Acciones</th>
           </tr>
         </thead>
         <tbody>
-          {purchases.map(p => (
-            <tr key={p.id} className="border-b">
-              <td className="px-4 py-2">{p.nombreCliente}</td>
-              <td className="px-4 py-2">{p.tipo}</td>
-              <td className="px-4 py-2">{p.peso}</td>
-              <td className="px-4 py-2">{p.pesoNeto}</td>
-              <td className="px-4 py-2">{p.precio}</td>
-              <td className="px-4 py-2">{p.total}</td>
-              <td className="px-4 py-2 space-x-1">
+          {purchases.map((p) => (
+            <tr key={p.id}>
+              <td className="py-2 px-4 border">{p.nombreCliente}</td>
+              <td className="py-2 px-4 border">{p.tipo}</td>
+              <td className="py-2 px-4 border">{p.peso}</td>
+              <td className="py-2 px-4 border">{p.pesoNeto}</td>
+              <td className="py-2 px-4 border">{formatMoney(p.precio)}</td>
+              <td className="py-2 px-4 border">{formatMoney(p.total)}</td>
+              <td className="py-2 px-4 border">{p.ubicacion}</td>
+              <td className="py-2 px-4 border">{p.nota}</td>
+              <td className="py-2 px-4 border">{formatDate(p.fecha)}</td>
+              <td className="py-2 px-4 border space-x-2">
                 <button
                   onClick={() => onEdit(p)}
-                  className="bg-yellow-500 text-white px-2 py-1 rounded hover:bg-yellow-600"
+                  className="bg-yellow-400 hover:bg-yellow-500 text-white px-2 py-1 rounded"
                 >
                   Editar
                 </button>
                 <button
                   onClick={() => onDelete(p.id)}
-                  className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"
+                  className="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded"
                 >
                   Eliminar
                 </button>
