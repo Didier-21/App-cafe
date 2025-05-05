@@ -1,67 +1,64 @@
+// src/components/coffeePurchases/CoffeeList.js
 import React from 'react';
 
 export default function CoffeeList({ purchases, onDelete, onEdit }) {
-  const formatMoney = (value) =>
-    value.toLocaleString('es-CO', { style: 'currency', currency: 'COP' });
-
-  const formatDate = (isoDate) => {
-    const date = new Date(isoDate);
-    return date.toLocaleString('es-CO', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  };
+  const formatCurrency = (value) =>
+    value.toLocaleString('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 });
 
   return (
-    <div className="mt-6 overflow-x-auto">
-      <table className="min-w-full bg-white border shadow">
-        <thead>
-          <tr className="bg-gray-100 text-left">
-            <th className="py-2 px-4 border">Cliente</th>
-            <th className="py-2 px-4 border">Tipo</th>
-            <th className="py-2 px-4 border">Peso (Kg)</th>
-            <th className="py-2 px-4 border">Peso Neto</th>
-            <th className="py-2 px-4 border">Precio/Kg</th>
-            <th className="py-2 px-4 border">Total</th>
-            <th className="py-2 px-4 border">Ubicación</th>
-            <th className="py-2 px-4 border">Nota</th>
-            <th className="py-2 px-4 border">Fecha</th>
-            <th className="py-2 px-4 border">Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          {purchases.map((p) => (
-            <tr key={p.id}>
-              <td className="py-2 px-4 border">{p.nombreCliente}</td>
-              <td className="py-2 px-4 border">{p.tipo}</td>
-              <td className="py-2 px-4 border">{p.peso}</td>
-              <td className="py-2 px-4 border">{p.pesoNeto}</td>
-              <td className="py-2 px-4 border">{formatMoney(p.precio)}</td>
-              <td className="py-2 px-4 border">{formatMoney(p.total)}</td>
-              <td className="py-2 px-4 border">{p.ubicacion}</td>
-              <td className="py-2 px-4 border">{p.nota}</td>
-              <td className="py-2 px-4 border">{formatDate(p.fecha)}</td>
-              <td className="py-2 px-4 border space-x-2">
-                <button
-                  onClick={() => onEdit(p)}
-                  className="bg-yellow-400 hover:bg-yellow-500 text-white px-2 py-1 rounded"
-                >
-                  Editar
-                </button>
-                <button
-                  onClick={() => onDelete(p.id)}
-                  className="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded"
-                >
-                  Eliminar
-                </button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+    <div className="mt-8">
+      <h2 className="text-lg font-semibold mb-4">Compras Registradas</h2>
+      {purchases.length === 0 ? (
+        <p className="text-gray-500">No hay compras registradas.</p>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="min-w-full bg-white border">
+            <thead>
+              <tr className="bg-gray-100 text-left">
+                <th className="py-2 px-4 border-b">Fecha</th>
+                <th className="py-2 px-4 border-b">Cliente</th>
+                <th className="py-2 px-4 border-b">Tipo</th>
+                <th className="py-2 px-4 border-b">Peso (Kg)</th>
+                <th className="py-2 px-4 border-b">Peso Neto</th>
+                <th className="py-2 px-4 border-b">Precio/Kg</th>
+                <th className="py-2 px-4 border-b">Total</th>
+                <th className="py-2 px-4 border-b">Ubicación</th>
+                <th className="py-2 px-4 border-b">Nota</th>
+                <th className="py-2 px-4 border-b">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {purchases.map((purchase) => (
+                <tr key={purchase.id} className="hover:bg-gray-50">
+                  <td className="py-2 px-4 border-b">{purchase.fecha || '-'}</td>
+                  <td className="py-2 px-4 border-b">{purchase.nombreCliente}</td>
+                  <td className="py-2 px-4 border-b">{purchase.tipo}</td>
+                  <td className="py-2 px-4 border-b">{purchase.peso}</td>
+                  <td>{parseFloat(purchase.pesoNeto).toFixed(1).replace(/\.0$/, '')}</td>
+                  <td className="py-2 px-4 border-b">{formatCurrency(purchase.precio)}</td>
+                  <td className="py-2 px-4 border-b">{formatCurrency(purchase.total)}</td>
+                  <td className="py-2 px-4 border-b">{purchase.ubicacion}</td>
+                  <td className="py-2 px-4 border-b">{purchase.nota || '-'}</td>
+                  <td className="py-2 px-4 border-b">
+                    <button
+                      onClick={() => onEdit(purchase)}
+                      className="text-blue-600 hover:underline mr-2"
+                    >
+                      Editar
+                    </button>
+                    <button
+                      onClick={() => onDelete(purchase.id)}
+                      className="text-red-600 hover:underline"
+                    >
+                      Eliminar
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 }

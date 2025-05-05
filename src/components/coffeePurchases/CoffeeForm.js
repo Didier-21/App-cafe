@@ -39,7 +39,7 @@ export default function CoffeeForm({ onSave, selectedPurchase, onCancelEdit }) {
     }
     setErrors({});
   }, [selectedPurchase]);
-  
+
 
   // Validaciones
   const validate = () => {
@@ -51,6 +51,8 @@ export default function CoffeeForm({ onSave, selectedPurchase, onCancelEdit }) {
     if (!form.precio || isNaN(form.precio)) errs.precio = 'Precio numérico requerido';
     if (!form.ubicacion.trim() || !/^[A-Za-z0-9 ]{1,25}$/.test(form.ubicacion))
       errs.ubicacion = 'Hasta 25 caracteres (letras y números)';
+    if (form.nota.length > 25)
+      errs.nota = 'Máx. 25 caracteres';
     setErrors(errs);
     return Object.keys(errs).length === 0;
   };
@@ -65,10 +67,10 @@ export default function CoffeeForm({ onSave, selectedPurchase, onCancelEdit }) {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!validate()) return;
-  
+
     const pesoNeto = calcularPesoNeto(parseFloat(form.peso), form.tipo);
     const total = +(pesoNeto * parseFloat(form.precio)).toFixed(2);
-  
+
     const nuevaCompra = {
       ...form,
       peso: parseFloat(form.peso),
@@ -78,9 +80,9 @@ export default function CoffeeForm({ onSave, selectedPurchase, onCancelEdit }) {
       fecha: selectedPurchase ? form.fecha : new Date().toISOString(),
       id: selectedPurchase?.id ?? undefined,
     };
-  
+
     onSave(nuevaCompra);
-  
+
     setForm({
       nombreCliente: '',
       tipo: '',
@@ -92,7 +94,7 @@ export default function CoffeeForm({ onSave, selectedPurchase, onCancelEdit }) {
     });
     setErrors({});
   };
-  
+
 
   return (
     <form onSubmit={handleSubmit} className="bg-white p-6 rounded shadow space-y-4">
@@ -165,9 +167,11 @@ export default function CoffeeForm({ onSave, selectedPurchase, onCancelEdit }) {
         <label className="block font-medium">Nota (opcional)</label>
         <textarea
           value={form.nota}
+          maxLength={25}
           onChange={e => setForm({ ...form, nota: e.target.value })}
           className="mt-1 w-full border px-3 py-2 rounded"
         />
+        {errors.nota && <p className="text-red-500 text-sm">{errors.nota}</p>}
       </div>
 
       <div className="flex justify-end space-x-2">
