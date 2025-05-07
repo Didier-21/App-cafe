@@ -1,5 +1,6 @@
 // src/components/coffeePurchases/CoffeeList.js
 import React from 'react';
+import moment from 'moment';
 
 export default function CoffeeList({ purchases, onDelete, onEdit }) {
   const formatCurrency = (value) =>
@@ -9,10 +10,14 @@ export default function CoffeeList({ purchases, onDelete, onEdit }) {
       minimumFractionDigits: 0,
     });
 
+  const formatDate = (fecha) => {
+    return fecha ? moment(fecha).format('DD/MM/YYYY HH:mm:ss') : '-';
+  };
+
   return (
     <div className="mt-8">
       <h2 className="text-lg font-semibold mb-4">Compras Registradas</h2>
-      {purchases.length === 0 ? (
+      {purchases?.length === 0 ? (
         <p className="text-gray-500">No hay compras registradas.</p>
       ) : (
         <div className="overflow-x-auto">
@@ -34,7 +39,7 @@ export default function CoffeeList({ purchases, onDelete, onEdit }) {
             <tbody>
               {purchases.map((purchase) => (
                 <tr key={purchase.id} className="hover:bg-gray-50">
-                  <td className="py-2 px-4 border-b">{purchase.fecha || '-'}</td>
+                  <td className="py-2 px-4 border-b">{formatDate(purchase.fecha)}</td>
                   <td className="py-2 px-4 border-b">
                     {purchase.nombreCliente || 'Cliente no especificado'}
                   </td>
