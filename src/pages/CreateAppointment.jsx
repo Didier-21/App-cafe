@@ -1,5 +1,4 @@
-// src/pages/CreateAppointment.jsx
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import localforage from 'localforage';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -8,6 +7,7 @@ const CreateAppointment = () => {
   const [clients, setClients] = useState([]);
   const [filteredClients, setFilteredClients] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [errors, setErrors] = useState({});
 
   const [appointment, setAppointment] = useState({
     id: '',
@@ -24,7 +24,6 @@ const CreateAppointment = () => {
     const fetchData = async () => {
       const storedAppointments = await localforage.getItem('appointments');
       const storedClients = await localforage.getItem('clients');
-
       setAppointments(storedAppointments || []);
       setClients(storedClients || []);
     };
@@ -39,6 +38,33 @@ const CreateAppointment = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
 
+    const currentDate = new Date(); // Fecha y hora actuales
+    const selectedDate = new Date(appointment.date); // Fecha seleccionada
+    const selectedTime = new Date(`${appointment.date}T${appointment.time}:00`); // Fecha y hora combinadas
+
+    // Aseguramos que la fecha no sea anterior a hoy
+    if (selectedDate < currentDate.setHours(0, 0, 0, 0)) {
+      setErrors((prev) => ({
+        ...prev,
+        date: 'La fecha debe ser hoy o una fecha futura.',
+      }));
+      return;
+    }
+
+    // Si la fecha es hoy, verificamos que la hora seleccionada sea posterior a la hora actual
+    if (selectedDate >= currentDate.setHours(0, 0, 0, 0) && selectedDate.toDateString() === currentDate.toDateString()) {
+      if (selectedTime <= currentDate) {
+        setErrors((prev) => ({
+          ...prev,
+          time: 'La hora debe ser una hora futura.',
+        }));
+        return;
+      }
+    }
+
+    setErrors({}); // Limpiar errores si todo está bien
+
+    // Validaciones generales de los otros campos
     if (
       !appointment.clientId ||
       !appointment.coffeeType ||
@@ -86,7 +112,6 @@ const CreateAppointment = () => {
     <div className="p-6 max-w-3xl mx-auto">
       <h2 className="text-xl font-bold mb-4">Programar Cita</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
-
         {/* 🔍 Buscador de clientes */}
         <div className="relative">
           <input
@@ -96,7 +121,7 @@ const CreateAppointment = () => {
             onChange={(e) => {
               const value = e.target.value;
               setAppointment({ ...appointment, clientName: value });
-              const matched = clients.filter(client =>
+              const matched = clients.filter((client) =>
                 client.name.toLowerCase().includes(value.toLowerCase())
               );
               setFilteredClients(matched);
@@ -107,14 +132,14 @@ const CreateAppointment = () => {
           />
           {showSuggestions && filteredClients.length > 0 && (
             <ul className="absolute z-10 bg-white border mt-1 w-full max-h-48 overflow-y-auto rounded shadow">
-              {filteredClients.map(client => (
+              {filteredClients.map((client) => (
                 <li
                   key={client.id}
                   onClick={() => {
                     setAppointment({
                       ...appointment,
                       clientId: client.id,
-                      clientName: client.name
+                      clientName: client.name,
                     });
                     setShowSuggestions(false);
                   }}
@@ -130,9 +155,7 @@ const CreateAppointment = () => {
         {/* ☕ Tipo de café */}
         <select
           value={appointment.coffeeType}
-          onChange={(e) =>
-            setAppointment({ ...appointment, coffeeType: e.target.value })
-          }
+          onChange={(e) => setAppointment({ ...appointment, coffeeType: e.target.value })}
           required
           className="w-full border p-2 rounded"
         >
@@ -150,32 +173,30 @@ const CreateAppointment = () => {
           type="number"
           placeholder="Cantidad en kilos"
           value={appointment.kilos}
-          onChange={(e) =>
-            setAppointment({ ...appointment, kilos: parseInt(e.target.value, 10) || '' })
-          }
+          onChange={(e) => setAppointment({ ...appointment, kilos: parseInt(e.target.value, 10) || '' })}
           required
           className="w-full border p-2 rounded"
         />
 
-        {/* 📅 Fecha y hora */}
+        {/* 📅 Fecha */}
         <input
           type="date"
           value={appointment.date}
-          onChange={(e) =>
-            setAppointment({ ...appointment, date: e.target.value })
-          }
+          onChange={(e) => setAppointment({ ...appointment, date: e.target.value })}
           required
           className="w-full border p-2 rounded"
         />
+        {errors.date && <p className="text-red-500 text-sm">{errors.date}</p>}
+
+        {/* ⏰ Hora */}
         <input
           type="time"
           value={appointment.time}
-          onChange={(e) =>
-            setAppointment({ ...appointment, time: e.target.value })
-          }
+          onChange={(e) => setAppointment({ ...appointment, time: e.target.value })}
           required
           className="w-full border p-2 rounded"
         />
+        {errors.time && <p className="text-red-500 text-sm">{errors.time}</p>}
 
         {/* 📝 Nota */}
         <input
@@ -183,9 +204,7 @@ const CreateAppointment = () => {
           placeholder="Nota (máx 25 caracteres)"
           maxLength={25}
           value={appointment.note}
-          onChange={(e) =>
-            setAppointment({ ...appointment, note: e.target.value })
-          }
+          onChange={(e) => setAppointment({ ...appointment, note: e.target.value })}
           className="w-full border p-2 rounded"
         />
 
