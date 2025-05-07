@@ -1,49 +1,49 @@
-// src/components/coffeePurchases/coffeeActions.js
+import localforage from 'localforage';
 
 const STORAGE_KEY = 'coffeePurchases';
 
-// Obtener todas las compras desde localStorage
-export const getAllPurchases = () => {
-  const stored = localStorage.getItem(STORAGE_KEY);
-  return stored ? JSON.parse(stored) : [];
+// Obtener todas las compras desde localforage
+export const getAllPurchases = async () => {
+  const stored = await localforage.getItem(STORAGE_KEY);
+  return stored || [];
 };
 
 // Guardar o actualizar una compra
-export const savePurchase = (purchase) => {
-  let purchases = getAllPurchases();
+export const savePurchase = async (purchase) => {
+  let purchases = await getAllPurchases();
 
   // Calculamos el peso neto basado en el tipo de café
-  let pesoNeto = purchase.peso; // Iniciamos con el peso original
-  if (purchase.tipo === "Café Mojado" || purchase.tipo === "Pasilla Mojada" || purchase.tipo === "Cascota") {
-    pesoNeto = pesoNeto * 0.92; // Restar el 8% del peso
+  let pesoNeto = purchase.peso;
+  if (
+    purchase.tipo === "Café Mojado" ||
+    purchase.tipo === "Pasilla Mojada" ||
+    purchase.tipo === "Cascota"
+  ) {
+    pesoNeto = pesoNeto * 0.92;
   }
 
   // Calculamos el total
   const total = pesoNeto * purchase.precio;
 
-  // Creamos un nuevo objeto con los datos calculados
   const newPurchase = {
     ...purchase,
-    pesoNeto, // Asignamos el peso neto calculado
-    total     // Asignamos el total calculado
+    pesoNeto,
+    total
   };
 
   if (newPurchase.id) {
-    // Si existe el id, actualizamos la compra
-    purchases = purchases.map((p) => (p.id === newPurchase.id ? newPurchase : p));
+    purchases = purchases.map(p => (p.id === newPurchase.id ? newPurchase : p));
   } else {
-    // Si es una compra nueva, le asignamos un nuevo id y la agregamos a la lista
-    newPurchase.id = Date.now(); // Usamos Date.now() como ID único
+    newPurchase.id = Date.now();
     purchases.push(newPurchase);
   }
 
-  // Guardamos la lista actualizada en localStorage
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(purchases));
+  await localforage.setItem(STORAGE_KEY, purchases);
 };
 
 // Eliminar una compra por ID
-export const deletePurchase = (id) => {
-  let purchases = getAllPurchases();
-  purchases = purchases.filter((purchase) => purchase.id !== id);
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(purchases));
+export const deletePurchase = async (id) => {
+  let purchases = await getAllPurchases();
+  purchases = purchases.filter(p => p.id !== id);
+  await localforage.setItem(STORAGE_KEY, purchases);
 };

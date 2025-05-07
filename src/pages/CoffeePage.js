@@ -12,26 +12,32 @@ export default function CoffeePage() {
   const [purchases, setPurchases] = useState([]);
   const [selectedPurchase, setSelectedPurchase] = useState(null);
 
-  // Carga inicial y cada vez que cambie el array
   useEffect(() => {
-    setPurchases(getAllPurchases());
+    const fetchPurchases = async () => {
+      const data = await getAllPurchases();
+      setPurchases(data);
+    };
+    fetchPurchases();
   }, []);
 
-  const refresh = () => setPurchases(getAllPurchases());
+  const refresh = async () => {
+    const updated = await getAllPurchases();
+    setPurchases(updated);
+  };
 
-  const handleSave = purchase => {
-    savePurchase(purchase);
-    refresh();
+  const handleSave = async (purchase) => {
+    await savePurchase(purchase);
+    await refresh();
     setSelectedPurchase(null);
   };
 
-  const handleEdit = purchase => {
+  const handleEdit = (purchase) => {
     setSelectedPurchase(purchase);
   };
 
-  const handleDelete = id => {
-    deletePurchase(id);
-    refresh();
+  const handleDelete = async (id) => {
+    await deletePurchase(id);
+    await refresh();
   };
 
   const handleCancelEdit = () => {

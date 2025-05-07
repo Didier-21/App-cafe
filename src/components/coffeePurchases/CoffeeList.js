@@ -3,7 +3,11 @@ import React from 'react';
 
 export default function CoffeeList({ purchases, onDelete, onEdit }) {
   const formatCurrency = (value) =>
-    value.toLocaleString('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 });
+    value.toLocaleString('es-CO', {
+      style: 'currency',
+      currency: 'COP',
+      minimumFractionDigits: 0,
+    });
 
   return (
     <div className="mt-8">
@@ -31,12 +35,20 @@ export default function CoffeeList({ purchases, onDelete, onEdit }) {
               {purchases.map((purchase) => (
                 <tr key={purchase.id} className="hover:bg-gray-50">
                   <td className="py-2 px-4 border-b">{purchase.fecha || '-'}</td>
-                  <td className="py-2 px-4 border-b">{purchase.nombreCliente}</td>
+                  <td className="py-2 px-4 border-b">
+                    {purchase.nombreCliente || 'Cliente no especificado'}
+                  </td>
                   <td className="py-2 px-4 border-b">{purchase.tipo}</td>
                   <td className="py-2 px-4 border-b">{purchase.peso}</td>
-                  <td>{parseFloat(purchase.pesoNeto).toFixed(1).replace(/\.0$/, '')}</td>
-                  <td className="py-2 px-4 border-b">{formatCurrency(purchase.precio)}</td>
-                  <td className="py-2 px-4 border-b">{formatCurrency(purchase.total)}</td>
+                  <td className="py-2 px-4 border-b">
+                    {parseFloat(purchase.pesoNeto).toFixed(1).replace(/\.0$/, '')}
+                  </td>
+                  <td className="py-2 px-4 border-b">
+                    {formatCurrency(purchase.precio)}
+                  </td>
+                  <td className="py-2 px-4 border-b">
+                    {formatCurrency(purchase.total)}
+                  </td>
                   <td className="py-2 px-4 border-b">{purchase.ubicacion}</td>
                   <td className="py-2 px-4 border-b">{purchase.nota || '-'}</td>
                   <td className="py-2 px-4 border-b">

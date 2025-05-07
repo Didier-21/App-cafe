@@ -1,33 +1,46 @@
 // src/components/coffeePurchases/CoffeeForm.js
 import React, { useState, useEffect } from 'react';
+import { getClients } from '../clients/clientActions'; // Ajusta si tu ruta es distinta
+import localforage from 'localforage';
 
 const tiposCafe = [
-  '', // obliga a seleccionar
-  'Café Mojado',
-  'Café Oreado',
-  'Café Seco',
-  'Pasilla',
-  'Pasilla Mojada',
-  'Cascota',
+  '', 'Café Mojado', 'Café Oreado', 'Café Seco',
+  'Pasilla', 'Pasilla Mojada', 'Cascota',
 ];
 
 export default function CoffeeForm({ onSave, selectedPurchase, onCancelEdit }) {
   const [form, setForm] = useState({
+    clienteId: '',
     nombreCliente: '',
     tipo: '',
     peso: '',
     precio: '',
     ubicacion: '',
     nota: '',
+    fecha: '',
   });
   const [errors, setErrors] = useState({});
+  const [clientes, setClientes] = useState([]);
+  const [filteredClients, setFilteredClients] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
 
-  // Carga para edición
+  // Carga de clientes desde localforage
+  useEffect(() => {
+    const cargarClientes = async () => {
+      const stored = await localforage.getItem('clients');
+      const todos = stored || await getClients();
+      setClientes(todos);
+    };
+    cargarClientes();
+  }, []);
+
+  // Prellenado para edición
   useEffect(() => {
     if (selectedPurchase) {
       setForm(selectedPurchase);
     } else {
       setForm({
+        clienteId: '',
         nombreCliente: '',
         tipo: '',
         peso: '',
@@ -40,12 +53,9 @@ export default function CoffeeForm({ onSave, selectedPurchase, onCancelEdit }) {
     setErrors({});
   }, [selectedPurchase]);
 
-
-  // Validaciones
   const validate = () => {
     const errs = {};
-    if (!form.nombreCliente.trim() || !/^[A-Za-zÁÉÍÓÚáéíóúÑñ ]{1,40}$/.test(form.nombreCliente))
-      errs.nombreCliente = 'Solo letras (máx 40 caracteres)';
+    if (!form.clienteId) errs.nombreCliente = 'Debe seleccionar un cliente válido';
     if (!form.tipo) errs.tipo = 'Debe seleccionar tipo de café';
     if (!form.peso || isNaN(form.peso)) errs.peso = 'Peso numérico requerido';
     if (!form.precio || isNaN(form.precio)) errs.precio = 'Precio numérico requerido';
@@ -57,14 +67,13 @@ export default function CoffeeForm({ onSave, selectedPurchase, onCancelEdit }) {
     return Object.keys(errs).length === 0;
   };
 
-  // Cálculo de peso neto
   const calcularPesoNeto = (peso, tipo) => {
-    if (['Café Mojado', 'Pasilla Mojada', 'Cascota'].includes(tipo)) {
-      return +(peso * 0.92).toFixed(2);
-    }
-    return +peso;
+    return ['Café Mojado', 'Pasilla Mojada', 'Cascota'].includes(tipo)
+      ? +(peso * 0.92).toFixed(2)
+      : +peso;
   };
-  const handleSubmit = (e) => {
+
+  const handleSubmit = e => {
     e.preventDefault();
     if (!validate()) return;
 
@@ -75,7 +84,7 @@ export default function CoffeeForm({ onSave, selectedPurchase, onCancelEdit }) {
       ...form,
       peso: parseFloat(form.peso),
       precio: parseFloat(form.precio),
-      pesoNeto: parseFloat(pesoNeto.toFixed(1)),
+      pesoNeto,
       total,
       fecha: selectedPurchase ? form.fecha : new Date().toISOString(),
       id: selectedPurchase?.id ?? undefined,
@@ -84,6 +93,7 @@ export default function CoffeeForm({ onSave, selectedPurchase, onCancelEdit }) {
     onSave(nuevaCompra);
 
     setForm({
+      clienteId: '',
       nombreCliente: '',
       tipo: '',
       peso: '',
@@ -93,8 +103,8 @@ export default function CoffeeForm({ onSave, selectedPurchase, onCancelEdit }) {
       fecha: '',
     });
     setErrors({});
+    setShowSuggestions(false);
   };
-
 
   return (
     <form onSubmit={handleSubmit} className="bg-white p-6 rounded shadow space-y-4">
@@ -102,23 +112,53 @@ export default function CoffeeForm({ onSave, selectedPurchase, onCancelEdit }) {
         {selectedPurchase ? 'Editar Compra' : 'Registrar Compra de Café'}
       </h2>
 
-      <div>
-        <label className="block font-medium">Nombre del Cliente</label>
+      {/* 🔍 Buscador de clientes */}
+      <div className="relative">
         <input
           type="text"
+          placeholder="Buscar cliente..."
           value={form.nombreCliente}
-          onChange={e => setForm({ ...form, nombreCliente: e.target.value })}
-          className="mt-1 w-full border px-3 py-2 rounded"
+          onChange={(e) => {
+            const value = e.target.value;
+            setForm({ ...form, nombreCliente: value });
+            const matched = clientes.filter(client =>
+              client.name.toLowerCase().includes(value.toLowerCase())
+            );
+            setFilteredClients(matched);
+            setShowSuggestions(true);
+          }}
+          onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+          className="w-full border p-2 rounded"
         />
-        {errors.nombreCliente && <p className="text-red-500 text-sm">{errors.nombreCliente}</p>}
+        {showSuggestions && filteredClients.length > 0 && (
+          <ul className="absolute z-10 bg-white border mt-1 w-full max-h-48 overflow-y-auto rounded shadow">
+            {filteredClients.map(client => (
+              <li
+                key={client.id}
+                onClick={() => {
+                  setForm({
+                    ...form,
+                    clienteId: client.id,
+                    nombreCliente: client.name
+                  });
+                  setShowSuggestions(false);
+                }}
+                className="p-2 hover:bg-gray-100 cursor-pointer"
+              >
+                {client.name}
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
 
+      {/* ☕ Tipo de café */}
       <div>
         <label className="block font-medium">Tipo de Café</label>
         <select
           value={form.tipo}
-          onChange={e => setForm({ ...form, tipo: e.target.value })}
-          className="mt-1 w-full border px-3 py-2 rounded"
+          onChange={(e) => setForm({ ...form, tipo: e.target.value })}
+          className={`mt-1 w-full border px-3 py-2 rounded ${errors.tipo ? 'border-red-500' : ''}`}
         >
           {tiposCafe.map((t, i) => (
             <option key={i} value={t}>{t || '-- Seleccione --'}</option>
@@ -127,6 +167,7 @@ export default function CoffeeForm({ onSave, selectedPurchase, onCancelEdit }) {
         {errors.tipo && <p className="text-red-500 text-sm">{errors.tipo}</p>}
       </div>
 
+      {/* Peso y Precio */}
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className="block font-medium">Peso (Kg)</label>
@@ -135,7 +176,7 @@ export default function CoffeeForm({ onSave, selectedPurchase, onCancelEdit }) {
             step="0.01"
             value={form.peso}
             onChange={e => setForm({ ...form, peso: e.target.value })}
-            className="mt-1 w-full border px-3 py-2 rounded"
+            className={`mt-1 w-full border px-3 py-2 rounded ${errors.peso ? 'border-red-500' : ''}`}
           />
           {errors.peso && <p className="text-red-500 text-sm">{errors.peso}</p>}
         </div>
@@ -146,23 +187,25 @@ export default function CoffeeForm({ onSave, selectedPurchase, onCancelEdit }) {
             step="0.01"
             value={form.precio}
             onChange={e => setForm({ ...form, precio: e.target.value })}
-            className="mt-1 w-full border px-3 py-2 rounded"
+            className={`mt-1 w-full border px-3 py-2 rounded ${errors.precio ? 'border-red-500' : ''}`}
           />
           {errors.precio && <p className="text-red-500 text-sm">{errors.precio}</p>}
         </div>
       </div>
 
+      {/* Ubicación */}
       <div>
         <label className="block font-medium">Ubicación</label>
         <input
           type="text"
           value={form.ubicacion}
           onChange={e => setForm({ ...form, ubicacion: e.target.value })}
-          className="mt-1 w-full border px-3 py-2 rounded"
+          className={`mt-1 w-full border px-3 py-2 rounded ${errors.ubicacion ? 'border-red-500' : ''}`}
         />
         {errors.ubicacion && <p className="text-red-500 text-sm">{errors.ubicacion}</p>}
       </div>
 
+      {/* Nota */}
       <div>
         <label className="block font-medium">Nota (opcional)</label>
         <textarea
@@ -174,6 +217,7 @@ export default function CoffeeForm({ onSave, selectedPurchase, onCancelEdit }) {
         {errors.nota && <p className="text-red-500 text-sm">{errors.nota}</p>}
       </div>
 
+      {/* Botones */}
       <div className="flex justify-end space-x-2">
         {selectedPurchase && (
           <button
