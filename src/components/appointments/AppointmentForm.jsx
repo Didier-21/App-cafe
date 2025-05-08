@@ -43,11 +43,25 @@ export default function AppointmentForm({ initialData, onSave, onCancel }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!formData.clientId || !formData.coffeeType || !formData.kilos || !formData.date || !formData.time) {
+    if (
+      !formData.clientId ||
+      !formData.coffeeType ||
+      !formData.kilos ||
+      !formData.date ||
+      !formData.time
+    ) {
       alert("Por favor completa todos los campos obligatorios.");
       return;
     }
-    onSave({ ...formData, kilos: parseInt(formData.kilos, 10) });
+
+    const client = clients.find((c) => c.id === formData.clientId);
+    const clientName = client ? client.name : "Sin nombre"; // Aseguramos que `client.name` esté disponible
+
+    onSave({
+      ...formData,
+      kilos: parseInt(formData.kilos, 10),
+      nombreCliente: clientName, // Aseguramos que se pase correctamente
+    });
   };
 
   return (
