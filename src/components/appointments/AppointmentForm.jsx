@@ -67,8 +67,9 @@ export default function AppointmentForm({ initialData, onSave, onCancel }) {
   return (
     <form onSubmit={handleSubmit} className="space-y-4 mb-6">
       <div>
-        <label className="block font-semibold">Cliente:</label>
+        <label htmlFor="clientId" className="block font-semibold">Cliente:</label>
         <select
+          id="clientId"
           name="clientId"
           value={formData.clientId}
           onChange={handleChange}
@@ -85,8 +86,9 @@ export default function AppointmentForm({ initialData, onSave, onCancel }) {
       </div>
 
       <div>
-        <label className="block font-semibold">Tipo de café:</label>
+        <label htmlFor="coffeeType" className="block font-semibold">Tipo de café:</label>
         <select
+          id="coffeeType"
           name="coffeeType"
           value={formData.coffeeType}
           onChange={handleChange}
@@ -104,8 +106,9 @@ export default function AppointmentForm({ initialData, onSave, onCancel }) {
       </div>
 
       <div>
-        <label className="block font-semibold">Cantidad (kg):</label>
+        <label htmlFor="kilos" className="block font-semibold">Cantidad (kg):</label>
         <input
+          id="kilos"
           type="number"
           name="kilos"
           value={formData.kilos}
@@ -116,8 +119,9 @@ export default function AppointmentForm({ initialData, onSave, onCancel }) {
       </div>
 
       <div>
-        <label className="block font-semibold">Fecha:</label>
+        <label htmlFor="date" className="block font-semibold">Fecha:</label>
         <input
+          id="date"
           type="date"
           name="date"
           value={formData.date}
@@ -128,8 +132,9 @@ export default function AppointmentForm({ initialData, onSave, onCancel }) {
       </div>
 
       <div>
-        <label className="block font-semibold">Hora:</label>
+        <label htmlFor="time" className="block font-semibold">Hora:</label>
         <input
+          id="time"
           type="time"
           name="time"
           value={formData.time}
@@ -140,8 +145,9 @@ export default function AppointmentForm({ initialData, onSave, onCancel }) {
       </div>
 
       <div>
-        <label className="block font-semibold">Nota (opcional):</label>
+        <label htmlFor="note" className="block font-semibold">Nota (opcional):</label>
         <input
+          id="note"
           type="text"
           name="note"
           value={formData.note}
