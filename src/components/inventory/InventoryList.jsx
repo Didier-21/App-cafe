@@ -47,7 +47,9 @@ const InventoryList = ({ inventario, onEdit, onDelete }) => {
                       <li key={index}>
                         {moment(compra.fecha).format("YYYY-MM-DD HH:mm")} —{" "}
                         {compra.nombreCliente || compra.clienteNombre} —{" "}
-                        {compra.tipoCafe} — {compra.kilos} kg @ ${compra.precioPorKilo}
+                        {compra.tipoCafe || compra.tipo} —{" "}
+                        {(compra.pesoNeto ?? compra.kilos)?.toFixed(2)} kg @ $
+                        {(compra.precioPorKilo ?? compra.precio)?.toFixed(2)}
                       </li>
                     ))}
                   </ul>

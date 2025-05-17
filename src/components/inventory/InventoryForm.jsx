@@ -56,9 +56,9 @@ const InventoryForm = ({ onSave, loteEditando, setLoteEditando, comprasSeleccion
     if (datosDesdeCompras) {
       setFormulario((prev) => ({
         ...prev,
-        tipoCafe: datosDesdeCompras.tipoCafe,
-        kilos: datosDesdeCompras.kilos,
-        precioPorKilo: datosDesdeCompras.precio,
+        tipoCafe: prev.tipoCafe || datosDesdeCompras.tipoCafe,
+        kilos: prev.kilos || datosDesdeCompras.kilos,
+        precioPorKilo: prev.precioPorKilo || datosDesdeCompras.precio,
       }));
     }
   }, [datosDesdeCompras]);
@@ -105,29 +105,41 @@ const InventoryForm = ({ onSave, loteEditando, setLoteEditando, comprasSeleccion
       {comprasSeleccionadas && comprasSeleccionadas.length > 0 && (
         <div className="mb-4 p-3 border rounded bg-gray-50 text-gray-800">
           <p className="font-semibold mb-2">Compras seleccionadas:</p>
-          <ul className="list-disc list-inside text-sm mb-2">
-            {comprasSeleccionadas.map((compra, index) => (
-              <li key={index}>
-                {compra.tipoCafe} – {compra.kilos} kg a ${parseFloat(compra.precio).toFixed(2)} /kg
-              </li>
-            ))}
-          </ul>
-          <div className="text-sm font-medium mt-2">
+          <div className="overflow-x-auto">
+            <table className="text-sm w-full table-auto border-collapse">
+              <thead>
+                <tr className="bg-gray-100">
+                  <th className="px-2 py-1 border">Fecha</th>
+                  <th className="px-2 py-1 border">Cliente</th>
+                  <th className="px-2 py-1 border">Tipo</th>
+                  <th className="px-2 py-1 border">Kilos Netos</th>
+                  <th className="px-2 py-1 border">Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                {comprasSeleccionadas.map((compra, index) => (
+                  <tr key={index}>
+                    <td className="border px-2 py-1">{compra.fecha}</td>
+                    <td className="border px-2 py-1">{compra.nombreCliente}</td>
+                    <td className="border px-2 py-1">{compra.tipoCafe}</td>
+                    <td className="border px-2 py-1">{parseFloat(compra.pesoNeto || 0)} kg</td>
+                    <td className="border px-2 py-1">${parseFloat(compra.total || 0).toFixed(2)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <div className="text-sm font-medium mt-3 space-y-1">
             <p>
-              <strong>Kilos totales:</strong>{" "}
-              {comprasSeleccionadas.reduce((total, c) => total + parseFloat(c.kilos || 0), 0)}
+              <strong>Kilos netos totales:</strong>{" "}
+              {comprasSeleccionadas.reduce((total, c) => total + parseFloat(c.pesoNeto || 0), 0).toFixed(2)}
             </p>
             <p>
-              <strong>Precio promedio:</strong>{" "}
+              <strong>Precio promedio real:</strong>{" "}
               {(() => {
-                const totalKilos = comprasSeleccionadas.reduce(
-                  (acc, c) => acc + parseFloat(c.kilos || 0),
-                  0
-                );
-                const totalCosto = comprasSeleccionadas.reduce(
-                  (acc, c) => acc + (parseFloat(c.kilos || 0) * parseFloat(c.precio || 0)),
-                  0
-                );
+                const totalKilos = comprasSeleccionadas.reduce((acc, c) => acc + parseFloat(c.pesoNeto || 0), 0);
+                const totalCosto = comprasSeleccionadas.reduce((acc, c) => acc + parseFloat(c.total || 0), 0);
                 return totalKilos ? `$${(totalCosto / totalKilos).toFixed(2)}` : "$0.00";
               })()}
             </p>

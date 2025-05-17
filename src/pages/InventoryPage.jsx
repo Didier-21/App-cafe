@@ -31,6 +31,13 @@ const InventoryPage = () => {
     fetchData();
   }, []);
 
+  // Asegura que si cambia loteEditando, también se actualicen las compras seleccionadas
+  useEffect(() => {
+    if (loteEditando) {
+      setComprasSeleccionadas(loteEditando.compras || []);
+    }
+  }, [loteEditando]);
+
   const handleGuardar = async (nuevoLote) => {
     const loteConCompras = {
       ...nuevoLote,
@@ -39,16 +46,18 @@ const InventoryPage = () => {
     };
 
     if (loteEditando) {
-      const loteConId = { ...loteConCompras, id: loteEditando.id };
-      await updateInventario(loteConId);
+      const loteActualizado = { ...loteConCompras, id: loteEditando.id };
+      await updateInventario(loteActualizado);
       setInventario((prev) =>
-        prev.map((lote) => (lote.id === loteEditando.id ? loteConId : lote))
+        prev.map((lote) =>
+          lote.id === loteEditando.id ? loteActualizado : lote
+        )
       );
       setLoteEditando(null);
     } else {
-      const loteConId = { ...loteConCompras, id: Date.now() };
-      await saveInventario(loteConId);
-      setInventario((prev) => [...prev, loteConId]);
+      const loteNuevo = { ...loteConCompras, id: Date.now() };
+      await saveInventario(loteNuevo);
+      setInventario((prev) => [...prev, loteNuevo]);
     }
 
     setComprasSeleccionadas([]);
@@ -66,11 +75,11 @@ const InventoryPage = () => {
 
   const handleConfirmarCompras = (compras) => {
     setComprasSeleccionadas(compras);
-    setMostrarModalCompras(false); // cierro modal al confirmar
+    setMostrarModalCompras(false);
   };
 
   return (
-    <div className="p-4 max-w-3xl mx-auto">
+    <div className="p-4 max-w-4xl mx-auto">
       <h1 className="text-2xl font-bold mb-4 text-center">Inventario</h1>
 
       <div className="flex justify-end mb-4">
@@ -79,7 +88,7 @@ const InventoryPage = () => {
           className="px-4 py-2 bg-blue-600 text-white rounded"
           type="button"
         >
-          Compras
+          Seleccionar compras
         </button>
       </div>
 
@@ -87,22 +96,23 @@ const InventoryPage = () => {
         onSave={handleGuardar}
         loteEditando={loteEditando}
         setLoteEditando={setLoteEditando}
-        comprasSeleccionadas={comprasSeleccionadas} // cambio de nombre para claridad
+        comprasSeleccionadas={comprasSeleccionadas}
       />
 
-      <InventoryList
-        inventario={inventario}
-        onDelete={handleEliminar}
-        onEdit={handleEditar}
-      />
+      <div className="mt-8">
+        <InventoryList
+          inventario={inventario}
+          onDelete={handleEliminar}
+          onEdit={handleEditar}
+        />
+      </div>
 
       <SelectPurchasesModal
         isOpen={mostrarModalCompras}
         onClose={() => setMostrarModalCompras(false)}
-        onSelect={handleConfirmarCompras} // ✅ Nombre correcto
+        onSelect={handleConfirmarCompras}
         compras={comprasDisponibles}
       />
-
     </div>
   );
 };

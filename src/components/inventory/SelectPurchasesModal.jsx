@@ -33,11 +33,9 @@ const SelectPurchasesModal = ({ isOpen, onClose, onSelect, compras }) => {
   };
 
   const toggleSeleccion = (id) => {
-    if (seleccionadas.includes(id)) {
-      setSeleccionadas(seleccionadas.filter((sid) => sid !== id));
-    } else {
-      setSeleccionadas([...seleccionadas, id]);
-    }
+    setSeleccionadas((prev) =>
+      prev.includes(id) ? prev.filter((sid) => sid !== id) : [...prev, id]
+    );
   };
 
   const toggleSeleccionTodas = () => {
@@ -53,17 +51,27 @@ const SelectPurchasesModal = ({ isOpen, onClose, onSelect, compras }) => {
 
   const confirmar = () => {
     const seleccion = comprasFiltradas.filter((c) => seleccionadas.includes(c.id));
-    onSelect(seleccion);
+    const conTipoCafe = seleccion.map((c) => ({
+      ...c,
+      tipoCafe: c.tipo,
+    }));
+    onSelect(conTipoCafe);
     onClose();
   };
+
+  const comprasSeleccionadas = comprasFiltradas.filter((c) => seleccionadas.includes(c.id));
+  const kilosTotales = comprasSeleccionadas.reduce((sum, c) => sum + c.pesoNeto, 0);
+  const totalAcumulado = comprasSeleccionadas.reduce((sum, c) => sum + c.total, 0);
+  const precioPromedio = kilosTotales > 0 ? totalAcumulado / kilosTotales : 0;
 
   return (
     <Dialog open={isOpen} onClose={onClose} className="relative z-50">
       <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
       <div className="fixed inset-0 flex items-center justify-center p-4">
-        <Dialog.Panel className="bg-white p-6 rounded-xl shadow-lg max-w-4xl w-full">
+        <Dialog.Panel className="bg-white p-6 rounded-xl shadow-lg max-w-6xl w-full">
           <Dialog.Title className="text-xl font-bold mb-4">Seleccionar compras</Dialog.Title>
 
+          {/* Filtros de fecha */}
           <div className="flex gap-4 mb-4">
             <div className="flex flex-col">
               <label className="text-sm">Desde:</label>
@@ -93,6 +101,7 @@ const SelectPurchasesModal = ({ isOpen, onClose, onSelect, compras }) => {
 
           {comprasFiltradas.length > 0 ? (
             <>
+              {/* Tabla de compras filtradas */}
               <div className="overflow-x-auto max-h-64 overflow-y-auto border rounded">
                 <table className="w-full text-sm">
                   <thead className="bg-gray-100 sticky top-0">
@@ -107,8 +116,8 @@ const SelectPurchasesModal = ({ isOpen, onClose, onSelect, compras }) => {
                       <th className="p-2 text-left">Fecha</th>
                       <th className="p-2 text-left">Cliente</th>
                       <th className="p-2 text-left">Tipo de café</th>
-                      <th className="p-2 text-left">Kilos</th>
-                      <th className="p-2 text-left">$/kg</th>
+                      <th className="p-2 text-left">Kilos Netos</th>
+                      <th className="p-2 text-left">Total</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -122,16 +131,25 @@ const SelectPurchasesModal = ({ isOpen, onClose, onSelect, compras }) => {
                           />
                         </td>
                         <td className="p-2">{moment(compra.fecha).format("YYYY-MM-DD HH:mm")}</td>
-                        <td className="p-2">{compra.nombreCliente || compra.clienteNombre}</td>
-                        <td className="p-2">{compra.tipoCafe}</td>
-                        <td className="p-2">{compra.kilos}</td>
-                        <td className="p-2">${compra.precioPorKilo}</td>
+                        <td className="p-2">{compra.nombreCliente}</td>
+                        <td className="p-2">{compra.tipo}</td>
+                        <td className="p-2">{compra.pesoNeto.toFixed(2)} kg</td>
+                        <td className="p-2">${compra.total.toFixed(2)}</td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
               </div>
 
+              {/* Resumen de selección */}
+              {comprasSeleccionadas.length > 0 && (
+                <div className="mt-4 text-sm bg-gray-50 p-4 rounded shadow-inner">
+                  <p><strong>Kilos totales:</strong> {kilosTotales.toFixed(2)} kg</p>
+                  <p><strong>Precio promedio:</strong> ${precioPromedio.toFixed(2)} /kg</p>
+                </div>
+              )}
+
+              {/* Botones de acción */}
               <div className="flex justify-end gap-2 mt-4">
                 <button onClick={onClose} className="px-4 py-2 rounded border">
                   Cancelar
