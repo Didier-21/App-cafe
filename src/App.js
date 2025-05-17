@@ -4,7 +4,7 @@ import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import ClientsPage from './pages/ClientsPage';
 import CoffeePage from "./pages/CoffeePage";
 import CreateAppointment from './pages/CreateAppointment';
-
+import InventoryPage from './pages/InventoryPage';
 
 
 
@@ -20,8 +20,7 @@ function App() {
           <li><Link to="/clientes">Clientes</Link></li>
           <li><Link to="/compras">Compras</Link></li>
           <li><Link to="/crear-cita">cita</Link></li>
-         
-          {/* <li><Link to="/lotes">Lotes</Link></li> */}
+          <li><Link to="/inventario">Inventario</Link></li> {/* Agregar el enlace al inventario */}
         </ul>
       </nav>
 
@@ -30,6 +29,7 @@ function App() {
         <Route path="/clientes" element={<ClientsPage />} />
         <Route path="/compras" element={<CoffeePage />} />
         <Route path="/crear-cita" element={<CreateAppointment />} />
+        <Route path="/inventario" element={<InventoryPage />} /> 
         {/* <Route path="/lotes" element={<LotsPage />} /> */}
       </Routes>
     </Router>

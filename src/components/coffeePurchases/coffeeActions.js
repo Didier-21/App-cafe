@@ -47,3 +47,21 @@ export const deletePurchase = async (id) => {
   purchases = purchases.filter(p => p.id !== id);
   await localforage.setItem(STORAGE_KEY, purchases);
 };
+
+// ✅ NUEVO: Marcar compras como convertidas a inventario
+export const markPurchasesAsConverted = async (purchaseIds, idLoteInventario) => {
+  let purchases = await getAllPurchases();
+
+  const updatedPurchases = purchases.map(p => {
+    if (purchaseIds.includes(p.id)) {
+      return {
+        ...p,
+        convertida: true,
+        idLoteInventario: idLoteInventario,
+      };
+    }
+    return p;
+  });
+
+  await localforage.setItem(STORAGE_KEY, updatedPurchases);
+};
